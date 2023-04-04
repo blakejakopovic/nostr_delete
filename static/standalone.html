@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Publish Nostr Event Deletions">
+    <meta name="author" content="Blake Jakopovic">
+    <title>Nostr Event Deletion</title>
+
+    <meta property="og:title" content="Publish Nostr Event Deletions!">
+    <meta name="twitter:title" content="Publish Nostr Event Deletions!">
+
+    <meta property="og:description" content="Publish Nostr Event Deletions.">
+    <meta name="twitter:description" content="Publish Nostr Event Deletions.">
+
+    <!-- <meta property="og:image" content="https://cdn.nostrgraph.net/public/archive_icon.png"> -->
+    <!-- <meta name="twitter:image" content="https://cdn.nostrgraph.net/public/archive_icon.png"> -->
+
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .b-divider {
+        height: 3rem;
+        background-color: rgba(0, 0, 0, .1);
+        border: solid rgba(0, 0, 0, .15);
+        border-width: 1px 0;
+        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+      }
+
+      .alert, .spinner-border {
+        display: none;
+      }
+    </style>
+
+  </head>
+  <body>
+
+<main>
+
+  <div id="error-message" class="alert alert-warning alert-dismissible fade show" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <h1 class="visually-hidden">Nostr Event Deletion</h1>
+
+  <div id="block1" class="px-4 py-5 my-5 text-center">
+    <!-- <img class="d-block mx-auto mb-4" src="https://cdn.nostrgraph.net/public/archive_icon.png" alt="" width="72" height="72"> -->
+    <h1 class="display-5 fw-bold">Nostr Event Deletion</h1>
+    <br/>
+    <div class="col-lg-6 mx-auto">
+      <p id="tagline" class="lead mb-4">So.. you want something gone? </p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <form class="w-100 me-3" role="submit">
+
+          <input type="text" class="form-control mb-4" id="bech32_input" placeholder="note1..." value="" oninput="validate_bech32()" required>
+
+          <div id="eventPreviewCard" class="card mb-4 text-center" style="display: none;">
+            <div id="eventPreviewBody" class="card-body">
+              <a href="#" onclick=loadEventPreview()>Try Preview Event (best effort)</a>
+            </div>
+          </div>
+
+          <div class="accordion" id="accordionRelays">
+
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedRelays" aria-expanded="true" aria-controls="advancedRelays">
+                  Advanced: Nostr Relay Selection
+                </button>
+              </h2>
+              <div id="advancedRelays" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+                <div class="list-group text-start">
+
+                  <label class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <input class="form-check-input me-1" type="checkbox" value="wss://nostr.mutinywallet.com" checked>
+                      wss://nostr.mutinywallet.com
+                    </span>
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </label>
+
+                  <label class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <input class="form-check-input me-1" type="checkbox" value="wss://relay.damus.io" checked>
+                      wss://relay.damus.io
+                    </span>
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </label>
+
+                  <label class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <input class="form-check-input me-1" type="checkbox" value="wss://nos.lol" checked>
+                      wss://nos.lol
+                    </span>
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </label>
+
+                  <label class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <input class="form-check-input me-1" type="checkbox" value="wss://badrelay.url">
+                      wss://badrelay.url
+                    </span>
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </label>
+
+                </div>
+
+                <div id="relayInputGroup" class="input-group mb-3 mt-1">
+                  <input type="text" id="relay_input" class="form-control" placeholder="wss://" aria-label="relay url">
+                  <button class="btn btn-outline-primary" type="button" onclick=addRelay()>Add Relay</button>
+                </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <button id="deleteBtn" type="button" onclick=deleteClicked() class="btn btn-danger btn-lg px-4 gap-3 mt-4" style="display: none;">Sign and Publish Deletion</button>
+          <div id="nip07RequiredMessage" class="mt-4" style="display: none;">
+            <strong>Please activate or install a <a href="https://github.com/nostr-protocol/nips/blob/master/07.md">NIP-07 Nostr Browser Extension</a> to continue</strong>
+          </div>
+          <div id="resetForm" class="mt-4" style="display: none;">
+            <a href="">Reset Form</a></strong>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-divider"></div>
+
+  <h1 class="visually-hidden">FAQ</h1>
+
+  <div id="block1" class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold">FAQ</h1>
+    <br/>
+    <div class="col-lg-6 mx-auto">
+      <h4>Why do relays have my data?</h4>
+      <p class="lead mb-4"><a href="https://github.com/nostr-protocol/nips/blob/master/01.md" target="_blank">Nostr</a> is a relay based network, where your messages are broadcast to multiple servers. This design helps make it censorship resistant and distributed.</p>
+      <h4>How does deletion work?</h4>
+      <p class="lead mb-4">Nostr supports a deletion event kind to request event removal. <a href="https://github.com/nostr-protocol/nips/blob/master/09.md" target="_blank">Find out more</a>. Deletion requests are best effort, however most relays will stop broadcasting events flagged as deleted.</p>
+      <h4>Can I undo deletion?</h4>
+      <p class="lead mb-4">In a way.. just create a new event with the same input as the deleted event. It will have a new unique identifier, however it not be marked as deleted and function like a normal event.</p>
+    </div>
+  </div>
+
+  <div class="b-divider"></div>
+
+  <div class="bg-dark text-secondary px-4 py-5 text-center">
+    <div class="py-5">
+      <h1 class="display-5 fw-bold text-white">Nostr Graph</h1>
+      <div class="col-lg-6 mx-auto">
+        <p class="fs-5 mb-4">This project is designed to help you have better control of your data. It's provided as a best-effort service and cannot force event deletion.</p>
+        <p>Provided by <a href="https://nostrgraph.net" style="color:#DDDDDD">https://nostrgraph.net</a>. Thanks <a href="https://github.com/fiatjaf/" target="_blank">@fiatjaf!</a></p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-divider mb-0"></div>
+</main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <!-- <script src="https://slowli.github.io/bech32-buffer/assets/js/bech32-buffer.min.js"></script> -->
+
+    <script type="text/javascript">
+
+(function(f) {
+    if (typeof exports === "object" && typeof module !== "undefined") {
+        module.exports = f()
+    } else if (typeof define === "function" && define.amd) {
+        define([], f)
+    } else {
+        var g;
+        if (typeof window !== "undefined") {
+            g = window
+        } else if (typeof global !== "undefined") {
+            g = global
+        } else if (typeof self !== "undefined") {
+            g = self
+        } else {
+            g = this
+        }
+        g.bech32 = f()
+    }
+})(function() {
+    var define,
+        module,
+        exports;
+    return (function() {
+        function r(e, n, t) {
+            function o(i, f) {
+                if (!n[i]) {
+                    if (!e[i]) {
+                        var c = "function" == typeof require && require;
+                        if (!f && c)
+                            return c(i, !0);
+                        if (u)
+                            return u(i, !0);
+                        var a = new Error("Cannot find module '" + i + "'");
+                        throw a.code = "MODULE_NOT_FOUND", a
+                    }
+                    var p = n[i] = {
+                        exports: {}
+                    };
+                    e[i][0].call(p.exports, function(r) {
+                        var n = e[i][1][r];
+                        return o(n || r)
+                    }, p, p.exports, r, e, n, t)
+                }
+                return n[i].exports
+            }
+            for (var u = "function" == typeof require && require, i = 0; i < t.length; i++)
+                o(t[i]);
+            return o
+        }
+        return r
+    })()({
+        1: [function(require, module, exports) {
+            "use strict";
+            Object.defineProperty(exports, "__esModule", {
+                value: !0
+            }),
+            exports.createBitArray = createBitArray,
+            exports.fromBits = fromBits,
+            exports.toBits = toBits;
+            function toBitArrayUnchecked(a) {
+                return a
+            }
+            function createBitArray(a) {
+                return toBitArrayUnchecked(new Uint8Array(a))
+            }
+            function convert(a, c, d, e, f) {
+                var g = (1 << e) - 1,
+                    h = 0,
+                    i = 0,
+                    j = 0;
+                if (a.forEach(function(a) {
+                    for (h = (h << c) + a, i += c; i >= e;)
+                        i -= e,
+                        d[j] = h >> i & g,
+                        j += 1
+                }), f)
+                    0 < i && (d[j] = h << e - i & g);
+                else {
+                    if (i >= c)
+                        throw new Error("Excessive padding: ".concat(i, " (max ").concat(c - 1, " allowed)"));
+                    if (0 != h % (1 << i))
+                        throw new Error("Non-zero padding")
+                }
+            }
+            function toBits(a, b, c) {
+                if (8 < b || 1 > b)
+                    throw new RangeError("Invalid bits per element; 1 to 8 expected");
+                return convert(toBitArrayUnchecked(a), 8, c, b, !0), c
+            }
+            function fromBits(a, b, c) {
+                if (8 < b || 1 > b)
+                    throw new RangeError("Invalid bits per element; 1 to 8 expected");
+                return convert(a, b, toBitArrayUnchecked(c), 8, !1), c
+            }
+
+        }, {}],
+        2: [function(require, module, exports) {
+            "use strict";
+            Object.defineProperty(exports, "__esModule", {
+                value: !0
+            }),
+            exports.CHECKSUM_LENGTH = void 0,
+            exports.createChecksum = createChecksum,
+            exports.decode = decode,
+            exports.decodeWithPrefix = decodeWithPrefix,
+            exports.detectCase = detectCase,
+            exports.encode = encode,
+            exports.expandPrefix = expandPrefix,
+            exports.verifyChecksum = verifyChecksum;
+            var _bitConverter = require("./bit-converter"),
+                CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l",
+                BECH32M_CHECKSUM = 734539939,
+                MIN_CHAR_CODE = 33,
+                MAX_CHAR_CODE = 126,
+                CHECKSUM_LENGTH = 6;
+            exports.CHECKSUM_LENGTH = CHECKSUM_LENGTH;
+            var CHAR_LOOKUP = function() {
+                    for (var a = new Map, b = 0; b < CHARSET.length; b += 1)
+                        a.set(CHARSET[b], b);
+                    return a
+                }(),
+                GEN = [996825010, 642813549, 513874426, 1027748829, 705979059];
+            function polymod(a) {
+                return a.reduce(function(a, b) {
+                    return GEN.reduce(function(b, c, d) {
+                        return 0 == (1 & a >> 25 >> d) ? b : b ^ c
+                    }, (33554431 & a) << 5 ^ b)
+                }, 1)
+            }
+            function expandPrefix(a, b) {
+                for (var c, d = 0; d < a.length; d += 1)
+                    c = a.charCodeAt(d),
+                    b[d] = c >> 5,
+                    b[d + a.length + 1] = 31 & c;
+                b[a.length] = 0
+            }
+            function verifyChecksum(a) {
+                switch (polymod(a)) {
+                case 1:
+                    return "bech32";
+                case BECH32M_CHECKSUM:
+                    return "bech32m";
+                default:
+                }
+            }
+            function createChecksum(a, b) {
+                var c;
+                switch (b) {
+                case "bech32":
+                    c = 1;
+                    break;
+                case "bech32m":
+                    c = BECH32M_CHECKSUM;
+                    break;
+                default:
+                    throw Error("Invalid encoding value: ".concat(b, "; expected bech32 or bech32m"));
+                }
+                for (var d, e = polymod(a) ^ c, f = 0; f < CHECKSUM_LENGTH; f += 1)
+                    d = 5 * (5 - f),
+                    a[a.length - CHECKSUM_LENGTH + f] = 31 & e >> d
+            }
+            function encode(a) {
+                return a.reduce(function(a, b) {
+                    return a + CHARSET[b]
+                }, "")
+            }
+            function decode(a, b) {
+                for (var c, d = b || (0, _bitConverter.createBitArray)(a.length), e = 0; e < a.length; e += 1) {
+                    if (c = CHAR_LOOKUP.get(a[e]), void 0 === c)
+                        throw new Error("Invalid char in message: ".concat(a[e]));
+                    d[e] = c
+                }
+                return d
+            }
+            function decodeWithPrefix(a, b) {
+                var c = b.length + 2 * a.length + 1,
+                    d = (0, _bitConverter.createBitArray)(c);
+                return expandPrefix(a, d.subarray(0, 2 * a.length + 1)), decode(b, d.subarray(2 * a.length + 1)), d
+            }
+            function detectCase(a) {
+                for (var b, c = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : "message", d = !1, e = !1, f = 0; f < a.length; f += 1) {
+                    if (b = a.charCodeAt(f), b < MIN_CHAR_CODE || b > MAX_CHAR_CODE)
+                        throw new TypeError("Invalid char in ".concat(c, ": ").concat(b, "; ") + "should be in ASCII range ".concat(MIN_CHAR_CODE, "-").concat(MAX_CHAR_CODE));
+                    e = e || 65 <= b && 90 >= b,
+                    d = d || 97 <= b && 122 >= b
+                }
+                if (d && e)
+                    throw new TypeError("Mixed-case ".concat(c));
+                else
+                    return e ? "upper" : d ? "lower" : null
+            }
+
+        }, {
+            "./bit-converter": 1
+        }],
+        3: [function(require, module, exports) {
+            "use strict";
+            Object.defineProperty(exports, "__esModule", {
+                value: !0
+            }),
+            exports.BitcoinAddress = void 0,
+            exports.decode = decode,
+            exports.decodeTo5BitArray = decodeTo5BitArray,
+            exports.encode = encode,
+            exports.encode5BitArray = encode5BitArray,
+            exports.from5BitArray = from5BitArray,
+            exports.to5BitArray = to5BitArray;
+            var _bitConverter = require("./bit-converter"),
+                _encoding = require("./encoding");
+            function _typeof(a) {
+                "@babel/helpers - typeof";
+                return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(a) {
+                    return typeof a
+                } : function(a) {
+                    return a && "function" == typeof Symbol && a.constructor === Symbol && a !== Symbol.prototype ? "symbol" : typeof a
+                }, _typeof(a)
+            }
+            function _classCallCheck(a, b) {
+                if (!(a instanceof b))
+                    throw new TypeError("Cannot call a class as a function")
+            }
+            function _defineProperties(a, b) {
+                for (var c, d = 0; d < b.length; d++)
+                    c = b[d],
+                    c.enumerable = c.enumerable || !1,
+                    c.configurable = !0,
+                    "value" in c && (c.writable = !0),
+                    Object.defineProperty(a, _toPropertyKey(c.key), c)
+            }
+            function _createClass(a, b, c) {
+                return b && _defineProperties(a.prototype, b), c && _defineProperties(a, c), Object.defineProperty(a, "prototype", {
+                    writable: !1
+                }), a
+            }
+            function _toPropertyKey(a) {
+                var b = _toPrimitive(a, "string");
+                return "symbol" === _typeof(b) ? b : b + ""
+            }
+            function _toPrimitive(a, b) {
+                if ("object" !== _typeof(a) || null === a)
+                    return a;
+                var c = a[Symbol.toPrimitive];
+                if (c !== void 0) {
+                    var d = c.call(a, b || "default");
+                    if ("object" !== _typeof(d))
+                        return d;
+                    throw new TypeError("@@toPrimitive must return a primitive value.")
+                }
+                return ("string" === b ? String : Number)(a)
+            }
+            var MAX_ENC_LENGTH = 5000;
+            function to5BitArray(a, b) {
+                var c = Math.ceil(8 * a.length / 5),
+                    d = b || (0, _bitConverter.createBitArray)(c);
+                return (0, _bitConverter.toBits)(a, 5, d)
+            }
+            function from5BitArray(a, b) {
+                var c = Math.floor(5 * a.length / 8),
+                    d = b || new Uint8Array(c);
+                return (0, _bitConverter.fromBits)(a, 5, d)
+            }
+            function encode5BitArray(a, b) {
+                var c,
+                    d = 2 < arguments.length && void 0 !== arguments[2] ? arguments[2] : "bech32",
+                    e = 2 * a.length + 1 + b.length + _encoding.CHECKSUM_LENGTH;
+                if (e - a.length > MAX_ENC_LENGTH)
+                    throw new Error("Message to be produced is too long (max ".concat(MAX_ENC_LENGTH, " supported)"));
+                var f = null !== (c = (0, _encoding.detectCase)(a, "prefix")) && void 0 !== c ? c : "lower",
+                    g = (0, _bitConverter.createBitArray)(e);
+                (0, _encoding.expandPrefix)(a.toLowerCase(), g.subarray(0, 2 * a.length + 1));
+                var h = g.subarray(2 * a.length + 1, g.length - _encoding.CHECKSUM_LENGTH);
+                h.set(b),
+                (0, _encoding.createChecksum)(g, d);
+                var i = (0, _encoding.encode)(g.subarray(2 * a.length + 1));
+                return "upper" === f && (i = i.toUpperCase()), "".concat(a, "1").concat(i)
+            }
+            function encode(a, b) {
+                var c = 2 < arguments.length && arguments[2] !== void 0 ? arguments[2] : "bech32";
+                return encode5BitArray(a, to5BitArray(b), c)
+            }
+            function decodeTo5BitArray(a) {
+                if (a.length > MAX_ENC_LENGTH)
+                    throw new TypeError("Message too long; max ".concat(MAX_ENC_LENGTH, " expected"));
+                (0, _encoding.detectCase)(a);
+                var b = a.toLowerCase(),
+                    c = b.lastIndexOf("1");
+                if (0 > c)
+                    throw new Error("No separator char (\"1\") found");
+                if (c > a.length - _encoding.CHECKSUM_LENGTH - 1)
+                    throw new Error("Data part of the message too short (at least ".concat(_encoding.CHECKSUM_LENGTH, " chars expected)"));
+                var d = b.substring(0, c),
+                    e = (0, _encoding.decodeWithPrefix)(d, b.substring(c + 1)),
+                    f = (0, _encoding.verifyChecksum)(e);
+                if (f === void 0)
+                    throw new Error("Invalid checksum");
+                return {
+                    prefix: d,
+                    encoding: f,
+                    data: e.subarray(2 * d.length + 1, e.length - _encoding.CHECKSUM_LENGTH)
+                }
+            }
+            function decode(a) {
+                var b = decodeTo5BitArray(a),
+                    c = b.prefix,
+                    d = b.encoding,
+                    e = b.data;
+                return {
+                    prefix: c,
+                    encoding: d,
+                    data: from5BitArray(e)
+                }
+            }
+            var BitcoinAddress = function() {
+                var a = Math.ceil;
+                function b(a, c, d) {
+                    if (_classCallCheck(this, b), "bc" !== a && "tb" !== a)
+                        throw new Error("Invalid human-readable prefix, \"bc\" or \"tb\" expected");
+                    if (0 > c || 16 < c)
+                        throw new RangeError("Invalid scriptVersion, value in range [0, 16] expected");
+                    if (2 > d.length || 40 < d.length)
+                        throw new RangeError("Invalid script length: expected 2 to 40 bytes");
+                    if (0 === c && 20 !== d.length && 32 !== d.length)
+                        throw new Error("Invalid v0 script length: expected 20 or 32 bytes");
+                    this.prefix = a,
+                    this.scriptVersion = c,
+                    this.data = d
+                }
+                return _createClass(b, [{
+                    key: "type",
+                    value: function type() {
+                        if (0 === this.scriptVersion)
+                            switch (this.data.length) {
+                            case 20:
+                                return "p2wpkh";
+                            case 32:
+                                return "p2wsh";
+                            default:
+                            }
+                    }
+                }, {
+                    key: "encode",
+                    value: function() {
+                        var b = a(8 * this.data.length / 5),
+                            c = (0, _bitConverter.createBitArray)(b + 1);
+                        c[0] = this.scriptVersion,
+                        to5BitArray(this.data, c.subarray(1));
+                        var d = 0 === this.scriptVersion ? "bech32" : "bech32m";
+                        return encode5BitArray(this.prefix, c, d)
+                    }
+                }], [{
+                    key: "decode",
+                    value: function(a) {
+                        var b = decodeTo5BitArray(a),
+                            c = b.prefix,
+                            d = b.data,
+                            e = b.encoding;
+                        if ("bc" !== c && "tb" !== c)
+                            throw new Error("Invalid human-readable prefix, \"bc\" or \"tb\" expected");
+                        var f = d[0];
+                        if (0 === f && "bech32" !== e)
+                            throw Error("Unexpected encoding ".concat(e, " used for version 0 script"));
+                        if (0 < f && "bech32m" !== e)
+                            throw Error("Unexpected encoding ".concat(e, " used for version ").concat(f, " script"));
+                        return new this(c, f, from5BitArray(d.subarray(1)))
+                    }
+                }]), b
+            }();
+            exports.BitcoinAddress = BitcoinAddress;
+
+        }, {
+            "./bit-converter": 1,
+            "./encoding": 2
+        }]
+    }, {}, [3])(3)
+});
+
+
+    </script>
+
+  <script>
+
+  const relays_processing = new Set();
+
+  const regex = new RegExp('^note1[a-z0-9]{58}$');
+
+  function validate_bech32() {
+
+      $('#error-message').hide();
+
+      let input = $("#bech32_input");
+
+      if (!regex.test(input.val())) {
+        $(input).removeClass('is-valid');
+        $(input).addClass('is-invalid');
+
+        $("#eventPreviewCard").hide();
+
+        return false;
+      } else {
+        $(input).removeClass('is-invalid');
+        $(input).addClass('is-valid');
+
+        $("#eventPreviewBody").html('<a href="#" onclick=loadEventPreview()>Try Preview Event (best effort)</a>');
+        $("#eventPreviewCard").show();
+
+        return true;
+      }
+  }
+
+// relays = await window.nostr.getRelays()
+// Object.entries(relays).filter(([k, v]) => v.write == true ).map(([k,v]) => k)
+
+// fetch 10002 kind
+
+
+  function nostrExtensionLoaded() {
+    if (!window.nostr) {
+      return false;
+    }
+    return true;
+  }
+
+  function sha256Hex(string) {
+    const utf8 = new TextEncoder().encode(string);
+
+    return crypto.subtle.digest('SHA-256', utf8).then((hashBuffer) => {
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray
+          .map((bytes) => bytes.toString(16).padStart(2, '0'))
+          .join('');
+
+        return hashHex;
+    });
+  }
+
+  async function generateNostrEventId(msg) {
+    const digest = [
+        0,
+        msg.pubkey,
+        msg.created_at,
+        msg.kind,
+        msg.tags,
+        msg.content,
+    ];
+    const digest_str = JSON.stringify(digest);
+    const hash = await sha256Hex(digest_str);
+
+    return hash;
+  }
+
+  async function createNostrDeleteEvent(event_ids) {
+    try {
+
+      if (!nostrExtensionLoaded()) {
+        throw "Nostr extension not loaded or available"
+      }
+
+      let msg = {
+          kind: 5, // NIP-X - Deletion
+          content: "", // Deletion Reason
+          tags: []
+      };
+
+      for (let event_id of event_ids) {
+        console.log(event_ids);
+        console.log(event_id);
+        msg.tags.push(["e", event_id])
+      }
+
+      // set msg fields
+      msg.created_at = Math.floor((new Date()).getTime() / 1000);
+      msg.pubkey = await window.nostr.getPublicKey();
+
+      // Generate event id
+      msg.id = await generateNostrEventId(msg);
+
+      // Sign event
+      signed_msg = await window.nostr.signEvent(msg);
+
+    } catch (e) {
+      console.log("Failed to sign message with browser extension", e);
+      return false;
+    }
+
+    return signed_msg;
+  }
+
+  async function deleteClicked() {
+
+    // TODO: Ensure valid note1/input
+    if (!validate_bech32()) { return }
+
+    $('#error-message').hide();
+
+    $("#deleteBtn").hide();
+    $("#eventPreviewCard").hide();
+    $("#relayInputGroup").hide();
+
+    $("#bech32_input").prop('disabled', true);
+
+    try {
+
+      // Try to convert bech32 input into event id
+      var bech32_encoded = $("#bech32_input").val();
+      let event_id_hex = eventBechToHex(bech32_encoded);
+
+      // Generate deletion event and ask to sign
+      var event = await createNostrDeleteEvent([event_id_hex]);
+      console.log(event);
+
+    } catch (error) {
+      console.error(error);
+      $('#error-message').text("Unable to sign deletion event:" + error);
+      $('#error-message').show();
+
+      $("#bech32_input").prop('disabled', false);
+      $("#deleteBtn").show();
+      $("#deleteBtn").prop('disabled', false);
+      $("#deleteBtn").removeClass('disabled');
+
+      $("#deleteBtn").addClass('btn-danger');
+      $("#deleteBtn").removeClass('btn-light');
+
+      return // early
+    }
+
+
+    let websocket_urls = [];
+
+    $("#headingTwo button").text("Publishing...");
+    $("#headingTwo button").addClass("fw-bold");
+    $("#advancedRelays").addClass("show");
+
+    $("#advancedRelays .form-check-input").hide();
+
+    // set all unchecked status to skipped
+    $("#advancedRelays .form-check-input").each(function(){
+      var checked = this.checked;
+
+      if (checked) {
+        websocket_urls.push($(this).val());
+
+        $(this).parent().parent().find(".spinner-border").show();
+      } else {
+        $(this).parent().parent().remove();
+      }
+    });
+
+    for (let websocket_url of websocket_urls) {
+      relays_processing.add(websocket_url);
+      publishEvent(websocket_url, event);
+    }
+
+    const limitedInterval = setInterval(() => {
+      if (relays_processing.size == 0) {
+        clearInterval(limitedInterval);
+
+        $("#headingTwo button").text("Complete");
+        $("#tagline").text("Correction: You wanted something gone... but now I forget what");
+
+        $("#resetForm").show();
+      }
+    }, 100);
+  }
+
+  function publishEvent(websocket_url, event) {
+    console.log("Publishing event to: " + websocket_url);
+
+    let enveloped_event = '["EVENT",'+JSON.stringify(event)+']';
+    console.log(enveloped_event);
+
+    var ws = new WebSocket(websocket_url);
+
+    // Add timeout
+    var timeout = setTimeout(function(){
+      let status = $("input[type=checkbox][value='"+websocket_url+"']").parent().parent().find("div")
+      status.removeClass("spinner-border");
+      status.removeClass("spinner-border-sm");
+      status.addClass("badge bg-warning");
+      status.html("Timeout");
+      relays_processing.delete(websocket_url);
+
+      ws.close();
+    }, 10000);
+
+    ws.onopen = function(event) {
+      ws.send(enveloped_event);
+    }
+
+    ws.onerror = function(error) {
+      console.log("websocket error - "+websocket_url+": " + JSON.stringify(error));
+
+      // If websocket errors or closes dirty, but we have already got what we need, no need to error
+      if (!relays_processing.has(websocket_url)) { return }
+
+      let status = $("input[type=checkbox][value='"+websocket_url+"']").parent().parent().find("div")
+      status.removeClass("spinner-border");
+      status.removeClass("spinner-border-sm");
+      status.addClass("badge bg-danger");
+      status.html("Failed");
+      relays_processing.delete(websocket_url);
+
+      ws.close();
+    }
+
+    ws.onclose = (event) => {
+      console.log(websocket_url+" - closed websocket.");
+    };
+
+    ws.onmessage = function(event) {
+      console.log('WS Message: '+websocket_url+' - '+event.data);
+
+      // TODO: Add try catch?
+      let response = JSON.parse(event.data);
+
+      // We need to handle wss://nostr.mutinywallet.com as a special case as they return false on success
+      if (response.length >= 3 && response[0] == "OK" &&
+          (response[2] == true ||
+           websocket_url == 'wss://nostr.mutinywallet.com' && response[3] == 'event already published')) {
+
+        clearTimeout(timeout);
+
+        let status = $("input[type=checkbox][value='"+websocket_url+"']").parent().parent().find("div")
+        status.removeClass("spinner-border");
+        status.removeClass("spinner-border-sm");
+        status.addClass("badge bg-success");
+        status.html("Success");
+
+        if (response.length == 4 && response[3]) {
+          status.attr('title', response[3]);
+        }
+
+        relays_processing.delete(websocket_url);
+
+        try { ws.close(); } catch {} // Some WS disconnect immediately
+      } else {
+        clearTimeout(timeout);
+
+        console.log(event);
+        // (maybe) update to error/failed
+        // (maybe) ws.close();
+
+        let status = $("input[type=checkbox][value='"+websocket_url+"']").parent().parent().find("div")
+        status.removeClass("spinner-border");
+        status.removeClass("spinner-border-sm");
+        status.addClass("badge bg-danger");
+        status.html("Failed");
+
+        relays_processing.delete(websocket_url);
+
+        try { ws.close(); } catch {} // Some WS disconnect immediately
+      }
+    }
+  }
+
+  function fetchEvent(websocket_url, event_id) {
+    console.log("fetching event from: " + websocket_url);
+
+    // TODO: Maybe make random/uuid for sub id
+    let nostr_request = '["REQ","101",{"ids":["'+event_id+'"]}]';
+    console.log(nostr_request);
+
+    var ws = new WebSocket(websocket_url);
+
+    // Add timeout
+    var timeout = setTimeout(function(){
+      // let status = $("input[type=checkbox][value='"+websocket_url+"']").parent().parent().find("div")
+      // status.removeClass("spinner-border");
+      // status.removeClass("spinner-border-sm");
+      // status.addClass("badge bg-warning");
+      // status.html("Timeout");
+      // relays_processing.delete(websocket_url);
+
+      ws.close();
+    }, 10000);
+
+    ws.onopen = function(event) {
+      ws.send(nostr_request);
+    }
+
+    // TODO: Extended error handling for load preview
+
+    ws.onmessage = function(event) {
+      console.log('WS Message: '+websocket_url+' - '+event.data);
+
+      // TODO: Add try catch?
+      let response = JSON.parse(event.data);
+
+      // We need to handle wss://nostr.mutinywallet.com as a special case as they return false on success
+      if (response.length == 3 && response[0] == "EVENT") {
+
+        clearTimeout(timeout);
+
+        let event = response[2];
+        console.log(event);
+
+        $("#eventPreviewBody .spinner-border").hide();
+        $("#eventPreviewBody").html(JSON.stringify(event));
+
+        try { ws.close(); } catch {} // Some WS disconnect immediately
+      } else if (response[0] == "EOSE") {
+        $("#eventPreviewBody .spinner-border").hide();
+        $("#eventPreviewBody").html("Event not found - but it may still exist somewhere");
+
+      } else {
+        clearTimeout(timeout);
+
+        try { ws.close(); } catch {} // Some WS disconnect immediately
+      }
+    }
+  }
+
+  function addRelay() {
+    var input = $('#relay_input');
+    var relay_url = input.val();
+
+    // TODO: validate format?
+    // TODO: validate not already added
+
+    $('#advancedRelays .list-group').append('<label class="list-group-item d-flex justify-content-between align-items-center"><span><input class="form-check-input me-1" type="checkbox" value="'+relay_url+'" checked>'+relay_url+'</span><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></label>');
+
+    input.val('');
+  }
+
+  function toHexString(buffer) {
+    return buffer.reduce((s, byte) => {
+      let hex = byte.toString(16);
+      if (hex.length === 1) hex = '0' + hex;
+      return s + hex;
+    }, '');
+  }
+
+  function eventBechToHex(bech32_encoded) {
+    var bech32_decoded = bech32.decode(bech32_encoded);
+    console.log(bech32_decoded);
+    return toHexString(bech32_decoded.data);
+  }
+
+  function loadEventPreview() {
+
+    try {
+      var bech32_encoded = $("#bech32_input").val();
+      event_id_hex = eventBechToHex(bech32_encoded);
+    } catch {
+      $('#error-message').text("Unable to decode event identifier");
+      $('#error-message').show();
+      return;
+    }
+
+    console.log('event_id: ' + event_id_hex);
+
+    $("#eventPreviewBody").html('<div class="spinner-border spinner-border-sm" role="status"></div>');
+    $("#eventPreviewBody .spinner-border").show();
+
+    fetchEvent('wss://nos.lol', event_id_hex);
+  }
+
+  function decode(bech32_encoded) {
+    var prefix, words, data, tlv;
+    var utf8Decoder = new TextDecoder();
+    var result = {};
+
+    // Decode the NIP-19 string using bech32
+    var bech32_decoded = bech32.decode(bech32_encoded);
+    prefix = bech32_decoded.prefix;
+    data = bech32_decoded.data;
+
+    switch (prefix) {
+      case 'nprofile':
+        tlv = parseTLV(data);
+        if (!tlv[0]?.[0]) throw new Error('missing TLV 0 for nprofile');
+        if (tlv[0][0].length !== 32) throw new Error('TLV 0 should be 32 bytes');
+        result.type = 'nprofile';
+        result.data = {
+          pubkey: toHexString(tlv[0][0]),
+          relays: tlv[1] ? tlv[1].map(function(d) { return utf8Decoder.decode(d); }) : []
+        };
+        break;
+
+      case 'nevent':
+        tlv = parseTLV(data);
+        if (!tlv[0]?.[0]) throw new Error('missing TLV 0 for nevent');
+        if (tlv[0][0].length !== 32) throw new Error('TLV 0 should be 32 bytes');
+        result.type = 'nevent';
+        result.data = {
+          id: toHexString(tlv[0][0]),
+          relays: tlv[1] ? tlv[1].map(function(d) { return utf8Decoder.decode(d); }) : []
+        };
+        break;
+
+      case 'naddr':
+        tlv = parseTLV(data);
+        if (!tlv[0]?.[0]) throw new Error('missing TLV 0 for naddr');
+        if (!tlv[2]?.[0]) throw new Error('missing TLV 2 for naddr');
+        if (tlv[2][0].length !== 32) throw new Error('TLV 2 should be 32 bytes');
+        if (!tlv[3]?.[0]) throw new Error('missing TLV 3 for naddr');
+        if (tlv[3][0].length !== 4) throw new Error('TLV 3 should be 4 bytes');
+        result.type = 'naddr';
+        result.data = {
+          identifier: utf8Decoder.decode(tlv[0][0]),
+          pubkey: toHexString(tlv[2][0]),
+          kind: parseInt(toHexString(tlv[3][0]), 16),
+          relays: tlv[1] ? tlv[1].map(function(d) { return utf8Decoder.decode(d); }) : []
+        };
+        break;
+
+      case 'nsec':
+      case 'npub':
+      case 'note':
+        result.type = prefix;
+        result.data = toHexString(data);
+        break;
+
+      default:
+        throw new Error('unknown prefix ' + prefix);
+    }
+
+    return result;
+  }
+
+  function parseTLV(data) {
+    let result = {};
+    let rest = data;
+
+    while (rest.length > 0) {
+      let t = rest[0];
+      let l = rest[1];
+      let v = rest.slice(2, 2 + l);
+      rest = rest.slice(2 + l);
+
+      if (v.length < l) continue;
+
+      result[t] = result[t] || [];
+      result[t].push(v);
+    }
+
+    return result;
+  }
+
+  function checkNostrExtension() {
+    var retryCount = 0; // initialize the retry count to 0
+
+    function check() {
+      // Check if window.nostr has loaded
+      if (window.nostr) {
+        nostr_enabled = true;
+        console.log("Nostr Extension loaded!");
+
+        $("#nip07RequiredMessage").hide();
+        $("#deleteBtn").show();
+
+        return;
+      }
+
+      $("#nip07RequiredMessage").show();
+      setTimeout(check, 250);
+    }
+
+    // Call the check function to start the retries
+    check();
+  }
+
+  // Call the function on page load
+  window.addEventListener('load', checkNostrExtension);
+
+  </script>
+</body>
+</html>
