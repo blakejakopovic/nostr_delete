@@ -10,7 +10,7 @@ Nostr Event Deletion micro web-app. Helps you create a Nostr deletion event (kin
 
 ## Usage
 
-You can also access the hosted version online at [Event Deletion](https://nostr-delete.vercel.app). It's 100% client side, so it's all client side javascript without server processing.
+You can also access the hosted version online at [https://nostr-delete.vercel.app](https://nostr-delete.vercel.app). It's 100% client side, so it's all client side javascript without server processing.
 
 
 To run locally (or develop), you can follow the steps below.
