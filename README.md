@@ -4,18 +4,35 @@ Nostr Event Deletion micro web-app. Helps you create a Nostr deletion event (kin
 
 ## Screenshots
 
-![Initial screen](/static/1.jpg)
+![Initial screen](/demo/1.jpg)
 
-![While processing](/static/2.jpg)
+![While processing](/demo/2.jpg)
 
 ## Usage
 
-To run locally, you can follow the steps below.
+You can also access the hosted version online at [Event Deletion](https://nostr-delete.vercel.app). It's 100% client side, so it's all client side javascript without server processing.
+
+
+To run locally (or develop), you can follow the steps below.
 
 ```bash
 git clone https://github.com/blakejakopovic/nostr_delete
 cd nostr_delete
 npm install
+
+# For generating static website files (as everything is client side anyway)
+npm run build
+
+# Run locally (a server is needed as browser extensions, at least in safari, wont activate using file:/// URLs)
+npm run preview
+
+# ----
+
+# Or, For running using instead using server side rendering
+
+# 1. Comment out (or delete) the code config in /src/routes/+layout.js
+# 2. Uncomment "import adapter from '@sveltejs/adapter-auto';" in svelte.config.js
+# 3. Comment   "import adapter from '@sveltejs/adapter-static';"  in svelte.config.js
 
 # start the server
 npm run dev
@@ -24,9 +41,3 @@ npm run dev
 npm run dev -- --open
 
 ```
-
-## Using Standalone
-
-This tool was first built using plain Javascript. I ported the initial prototype while learning Svelte, however a side effect is that it's no longer a single standalone html file. If you would like to use a version with slightly less features (basically without loading relays from your extension or kind 10_002 events), you can instead use the included [Nostr Event Deletion](static/standalone.html) standalone html file.
-
-You can also access the standalone version online at [NostrGraph - Event Deletion](http://cdn.nostrgraph.net/public/delete.html)
