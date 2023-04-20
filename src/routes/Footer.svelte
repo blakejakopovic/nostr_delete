@@ -25,18 +25,4 @@
   </div>
 </div>
 
-<div class="b-divider"></div>
-
-<div class="bg-dark text-secondary px-4 py-5 text-center">
-  <div class="py-5">
-    <h1 class="display-5 fw-bold text-white">Nostr Graph</h1>
-    <div class="col-lg-6 mx-auto">
-      <p class="fs-5 mb-4">This project is designed to help you have better control of your data. It's provided as a best-effort service and cannot force event deletion.</p>
-      <p>Provided by <a href="https://nostrgraph.net" style="color:#DDDDDD">https://nostrgraph.net</a>. Thanks <a href="https://github.com/fiatjaf/" target="_blank">@fiatjaf!</a></p>
-      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="b-divider mb-0"></div>
