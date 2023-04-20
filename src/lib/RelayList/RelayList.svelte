@@ -1,5 +1,5 @@
 <script> // lang=ts
-  import { RelayStore, SessionStore } from '../../stores'
+  import { RelayStore, SessionStore, TopRelayStore } from '../../stores'
   import RelayItem from './RelayItem.svelte';
 
   import { fetchAuthorEventKind } from '$lib/nostr'
@@ -120,6 +120,10 @@
     setTimeout(waitForResults, 50);
   }
 
+  async function loadTopRelays() {
+    addRelaysToStore(TopRelayStore);
+  }
+
   function addRelaysToStore(relays) {
     var valid_relays = relays.filter( (r) => valid_relay_url_regex.test(r) )
 
@@ -220,8 +224,9 @@
       </div>
 
       <div class="mt-3">
-        <button class="btn btn-outline-primary" type="button" on:click={addExtensionRelays} disabled={loadExtRelaysBtnDisabled}>Load Extension Relays</button>
-        <button class="btn btn-outline-primary" type="button" on:click={loadMyRelays} disabled={loadMyRelaysBtnDisabled}>Load My Kind 10002 Relays</button>
+        <button class="btn btn-outline-primary mb-1" type="button" on:click={addExtensionRelays} disabled={loadExtRelaysBtnDisabled}>Load Extension Relays</button>
+        <button class="btn btn-outline-primary mb-1" type="button" on:click={loadMyRelays} disabled={loadMyRelaysBtnDisabled}>Load My Kind 10002 Relays</button>
+        <button class="btn btn-outline-primary mb-1" type="button" on:click={loadTopRelays} disabled={loadMyRelaysBtnDisabled}>Load Top 150 Relays</button>
       </div>
     </div>
     {/if}

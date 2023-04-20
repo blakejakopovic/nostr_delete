@@ -22,7 +22,6 @@
     <p class="lead mb-4">Nostr supports a deletion event kind to request event removal. <a href="https://github.com/nostr-protocol/nips/blob/master/09.md" target="_blank">Find out more</a>. Deletion requests are best effort, however most relays will stop broadcasting events flagged as deleted.</p>
     <h4>Can I undo deletion?</h4>
     <p class="lead mb-4">In a way.. just create a new event with the same input as the deleted event. It will have a new unique identifier, however it not be marked as deleted and function like a normal event.</p>
-  </div>
     <h4>Where can I find the source code?</h4>
     <p class="lead mb-4"><a href="https://github.com/blakejakopovic/nostr_delete">https://github.com/blakejakopovic/nostr_delete</a></p>
   </div>
