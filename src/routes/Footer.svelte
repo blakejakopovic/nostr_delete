@@ -23,6 +23,9 @@
     <h4>Can I undo deletion?</h4>
     <p class="lead mb-4">In a way.. just create a new event with the same input as the deleted event. It will have a new unique identifier, however it not be marked as deleted and function like a normal event.</p>
   </div>
+    <h4>Where can I find the source code?</h4>
+    <p class="lead mb-4"><a href="https://github.com/blakejakopovic/nostr_delete">https://github.com/blakejakopovic/nostr_delete</a></p>
+  </div>
 </div>
 
 <div class="b-divider mb-0"></div>
