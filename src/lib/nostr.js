@@ -1,3 +1,5 @@
+import { bech32 } from "@scure/base";
+
 export function nostrExtensionLoaded() {
   if (!window.nostr) {
     return false;
@@ -6,8 +8,10 @@ export function nostrExtensionLoaded() {
 }
 
 export function eventBechToHex(bech32_encoded) {
-  var bech32_decoded = bech32.decode(bech32_encoded);
-  return toHexString(bech32_decoded.data);
+  var bech32_decoded = bech32.decode(bech32_encoded, 1000);
+  const data = new Uint8Array(bech32.fromWords(bech32_decoded.words));
+  const id = bech32_decoded.prefix === "note" ? data : decodeTlv(data)[0][0];
+  return toHexString(id);
 }
 
 export function toHexString(buffer) {
@@ -181,4 +185,14 @@ export async function createNostrDeleteEvent(pubkey, event_ids) {
   }
 
   return signed_msg;
+}
+
+function decodeTlv(buffer, acc = {}) {
+  const t = buffer[0];
+  const l = buffer[1];
+  const v = buffer.slice(2, 2 + l);
+  const values = acc[t] ?? [];
+  const result = { ...acc, [t]: [...values, v] };
+  const rest = buffer.slice(2 + l);
+  return rest.length > 0 ? decodeTlv(rest, result) : result;
 }
