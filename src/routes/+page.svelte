@@ -66,7 +66,7 @@
     const clipboard_text = await navigator.clipboard.readText()
 
     try {
-      bech32.decode(clipboard_text)
+      eventBechToHex(noteInputValue);
       noteInputValue = clipboard_text
       pasteBtnIconClass = 'bi bi-clipboard-check';
       pasteBtnClass = 'btn btn-success';
